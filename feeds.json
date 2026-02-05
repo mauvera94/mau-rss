@@ -13,6 +13,13 @@
       "source_url": "https://www.americastestkitchen.com/recipes/all",
       "match_url_contains": "americastestkitchen.com/recipes/",
       "max_items": 50
-    }
+    },
+    {
+      "id": "milk-street-recipes",
+      "title": "Milk Street — All Recipes (Unofficial RSS)",
+      "source_url": "https://www.177milkstreet.com/recipes",
+      "match_url_contains": "https://www.177milkstreet.com/recipes",
+      "max_items": 50
+    }    
   ]
 }
