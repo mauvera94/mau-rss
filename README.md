@@ -16,6 +16,8 @@ The system works by:
 5.  Updating both the feeds and the homepage automatically using GitHub
     Actions.
 
+The main site is https://mauvera94.github.io/mau-rss/
+
 ------------------------------------------------------------------------
 
 ## How It Works
@@ -102,7 +104,8 @@ The workflow is defined in:
 
 It:
 
--   Can be triggered manually.
+-   Runs on a schedule (hourly).
+-   Can also be triggered manually.
 -   Generates all feeds defined in feeds.json.
 -   Updates index.html.
 -   Commits changes back to the repository.
