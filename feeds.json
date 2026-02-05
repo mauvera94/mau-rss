@@ -6,17 +6,12 @@
       "source_url": "https://www.brianlagerstrom.com/recipes?category=All%20Recipes",
       "match_url_contains": "brianlagerstrom.com/recipes/",
       "max_items": 50
-    }
-  ]
-}
-
-{
-  "feeds": [
+    },
     {
       "id": "atk-recipes",
       "title": "America's Test Kitchen — All Recipes (Unofficial RSS)",
       "source_url": "https://www.americastestkitchen.com/recipes/all",
-      "match_url_contains": "https://www.americastestkitchen.com/recipes/all",
+      "match_url_contains": "americastestkitchen.com/recipes/",
       "max_items": 50
     }
   ]
