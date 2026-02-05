@@ -4,22 +4,31 @@
       "id": "brian-all-recipes",
       "title": "Brian Lagerstrom — All Recipes (Unofficial RSS)",
       "source_url": "https://www.brianlagerstrom.com/recipes?category=All%20Recipes",
-      "match_url_contains": "brianlagerstrom.com/recipes/",
+      "match_url_contains": "brianlagerstrom.com/",
+      "path_must_contain": "/recipes/",
+      "exclude_if_path_equals": ["/recipes"],
+      "exclude_if_url_contains": ["#"],
       "max_items": 50
     },
     {
       "id": "atk-recipes",
       "title": "America's Test Kitchen — All Recipes (Unofficial RSS)",
       "source_url": "https://www.americastestkitchen.com/recipes/all",
-      "match_url_contains": "americastestkitchen.com/recipes/",
+      "match_url_contains": "americastestkitchen.com/",
+      "path_must_contain": "/recipes/",
+      "exclude_if_path_equals": ["/recipes", "/recipes/all"],
+      "exclude_if_url_contains": ["#", "/account", "/login", "/subscribe"],
       "max_items": 50
     },
     {
       "id": "milk-street-recipes",
       "title": "Milk Street — All Recipes (Unofficial RSS)",
       "source_url": "https://www.177milkstreet.com/recipes",
-      "match_url_contains": "https://www.177milkstreet.com/recipes",
+      "match_url_contains": "177milkstreet.com/",
+      "path_must_contain": "/recipes/",
+      "exclude_if_path_equals": ["/recipes"],
+      "exclude_if_url_contains": ["#"],
       "max_items": 50
-    }    
+    }
   ]
 }
