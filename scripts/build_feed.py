@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import datetime, timezone
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -14,6 +14,8 @@ TEMPLATE_PATH = "site/template.html"
 
 SITE_BASE = "https://mauvera94.github.io/mau-rss"
 
+DEFAULT_BAD_TITLE_SUBSTRINGS = ["skip to main", "skip to content"]
+
 
 def utc_now_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -24,7 +26,17 @@ def load_config():
         return json.load(f)
 
 
-def fetch_links(source_url: str, match_url_contains: str):
+def fetch_links(source_url: str, feed_cfg: dict):
+    """
+    Extract candidate items (title, url) from a listing page.
+
+    Per-feed config supported (all optional except source_url):
+      - match_url_contains: str
+      - path_must_contain: str
+      - exclude_if_path_equals: [str]
+      - exclude_if_url_contains: [str]
+      - bad_title_substrings: [str]
+    """
     headers = {
         "User-Agent": "mauvera94-mau-rss (+https://github.com/mauvera94/mau-rss)"
     }
@@ -33,17 +45,53 @@ def fetch_links(source_url: str, match_url_contains: str):
 
     soup = BeautifulSoup(r.text, "html.parser")
 
+    src = urlparse(source_url)
+    required_host = src.netloc.lower()
+
+    match_url_contains = feed_cfg.get("match_url_contains", "")
+    path_must_contain = feed_cfg.get("path_must_contain")
+    exclude_if_path_equals = set(feed_cfg.get("exclude_if_path_equals", []))
+    exclude_if_url_contains = feed_cfg.get("exclude_if_url_contains", [])
+    bad_title_substrings = feed_cfg.get("bad_title_substrings", DEFAULT_BAD_TITLE_SUBSTRINGS)
+
     candidates = []
     for a in soup.select("a[href]"):
         href = (a.get("href") or "").strip()
         if not href:
             continue
-        full = urljoin(source_url, href)
 
-        if match_url_contains in full:
-            title = a.get_text(" ", strip=True)
-            if title and len(title) > 3:
-                candidates.append((title, full))
+        full = urljoin(source_url, href)
+        u = urlparse(full)
+
+        # 1) Keep same host only (prevents ads/external links)
+        if u.netloc.lower() != required_host:
+            continue
+
+        # 2) Must contain a substring, if configured
+        if match_url_contains and match_url_contains not in full:
+            continue
+
+        # 3) Exclude URLs containing junk substrings (e.g. '#', 'login')
+        if exclude_if_url_contains and any(s in full for s in exclude_if_url_contains):
+            continue
+
+        # 4) Exclude exact paths (often the listing page itself)
+        if u.path in exclude_if_path_equals:
+            continue
+
+        # 5) If defined, enforce required path pattern per site (not always /recipes/)
+        if path_must_contain and path_must_contain not in u.path:
+            continue
+
+        title = a.get_text(" ", strip=True)
+        if not title or len(title) < 4:
+            continue
+
+        t = title.lower()
+        if any(bad in t for bad in bad_title_substrings):
+            continue
+
+        candidates.append((title, full))
 
     # De-dupe while preserving order
     seen = set()
@@ -122,10 +170,9 @@ def main():
         feed_id = feed["id"]
         title = feed["title"]
         source_url = feed["source_url"]
-        match = feed["match_url_contains"]
         max_items = int(feed.get("max_items", 50))
 
-        items = fetch_links(source_url, match)
+        items = fetch_links(source_url, feed)
         out_path = write_rss(feed_id, title, source_url, items, max_items)
         print(f"Wrote: {out_path}")
 
