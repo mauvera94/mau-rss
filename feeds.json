@@ -9,3 +9,15 @@
     }
   ]
 }
+
+{
+  "feeds": [
+    {
+      "id": "atk-recipes",
+      "title": "America's Test Kitchen — All Recipes (Unofficial RSS)",
+      "source_url": "https://www.americastestkitchen.com/recipes/all",
+      "match_url_contains": "https://www.americastestkitchen.com/recipes/all",
+      "max_items": 50
+    }
+  ]
+}
