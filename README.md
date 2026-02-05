@@ -16,14 +16,6 @@ The system works by:
 5.  Updating both the feeds and the homepage automatically using GitHub
     Actions.
 
-All feed files are generated under:
-
-/feeds/<feed-id>.xml
-
-They are publicly accessible at:
-
-https://mauvera94.github.io/mau-rss/feeds/<feed-id>.xml
-
 ------------------------------------------------------------------------
 
 ## How It Works
@@ -76,10 +68,18 @@ To add a new website:
 
 Example:
 
-{ “id”: “soyparrillero-recetas”, “title”: “Soy Parrillero — Recetas
-(Unofficial RSS)”, “source_url”:
-“https://soyparrillero.mx/blogs/recetas”, “match_url_contains”:
-“soyparrillero.mx/blogs/recetas/”, “max_items”: 50 }
+```
+,
+    {
+      "id": "atk-recipes",
+      "title": "America's Test Kitchen — All Recipes (Unofficial RSS)",
+      "source_url": "https://www.americastestkitchen.com/recipes/all",
+      "match_url_contains": "americastestkitchen.com/recipes/",
+      "max_items": 50
+    }
+```
+
+
 
 Once committed:
 
@@ -88,7 +88,7 @@ Once committed:
 -   The homepage (index.html) updates automatically.
 -   The new feed becomes available at:
 
-https://mauvera94.github.io/mau-rss/feeds/soyparrillero-recetas.xml
+https://mauvera94.github.io/mau-rss/feeds/atk-recipes.xml
 
 No additional code changes are required.
 
@@ -102,8 +102,7 @@ The workflow is defined in:
 
 It:
 
--   Runs on a schedule (hourly).
--   Can also be triggered manually.
+-   Can be triggered manually.
 -   Generates all feeds defined in feeds.json.
 -   Updates index.html.
 -   Commits changes back to the repository.
@@ -115,9 +114,6 @@ It:
 The main page:
 
 https://mauvera94.github.io/mau-rss/
-
-is auto-generated during each workflow run. It lists all configured
-feeds and updates automatically whenever a new feed is added.
 
 ------------------------------------------------------------------------
 
