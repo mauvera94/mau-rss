@@ -2,7 +2,7 @@ name: Build RSS feed
 
 on:
   schedule:
-    - cron: "17 * * * *"  # hourly
+    - cron: "0 0 * * *"   # runs daily at 00:00 UTC
   workflow_dispatch: {}
 
 permissions:
