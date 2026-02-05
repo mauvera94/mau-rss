@@ -104,7 +104,7 @@ The workflow is defined in:
 
 It:
 
--   Runs on a schedule (hourly).
+-   Runs on a schedule (daily).
 -   Can also be triggered manually.
 -   Generates all feeds defined in feeds.json.
 -   Updates index.html.
