@@ -1,0 +1,11 @@
+{
+  "feeds": [
+    {
+      "id": "brian-all-recipes",
+      "title": "Brian Lagerstrom — All Recipes (Unofficial RSS)",
+      "source_url": "https://www.brianlagerstrom.com/recipes?category=All%20Recipes",
+      "match_url_contains": "brianlagerstrom.com/recipes/",
+      "max_items": 50
+    }
+  ]
+}

@@ -7,34 +7,25 @@ import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 
-TARGET_URL = "https://www.brianlagerstrom.com/recipes?category=All%20Recipes"
-OUT_FEED_PATH = "feeds/all.xml"
-STATE_PATH = "state/seen.json"
-MAX_ITEMS = 50
+
+CONFIG_PATH = "feeds.json"
+OUTPUT_DIR = "feeds"
 
 
 def utc_now():
     return datetime.now(timezone.utc)
 
 
-def load_state():
-    if not os.path.exists(STATE_PATH):
-        return {"seen_links": []}
-    with open(STATE_PATH, "r", encoding="utf-8") as f:
+def load_config():
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_state(state):
-    os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
-    with open(STATE_PATH, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
-
-
-def fetch_recipe_links():
+def fetch_links(source_url: str, match_url_contains: str):
     headers = {
         "User-Agent": "mauvera94-mau-rss (+https://github.com/mauvera94/mau-rss)"
     }
-    r = requests.get(TARGET_URL, headers=headers, timeout=30)
+    r = requests.get(source_url, headers=headers, timeout=30)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, "html.parser")
@@ -44,11 +35,9 @@ def fetch_recipe_links():
         href = (a.get("href") or "").strip()
         if not href:
             continue
+        full = urljoin(source_url, href)
 
-        full = urljoin(TARGET_URL, href)
-
-        # Heuristic: recipe pages typically live under /recipes/<slug>
-        if "brianlagerstrom.com/recipes/" in full:
+        if match_url_contains in full:
             title = a.get_text(" ", strip=True)
             if title and len(title) > 3:
                 candidates.append((title, full))
@@ -65,39 +54,45 @@ def fetch_recipe_links():
     return items
 
 
-def write_rss(items):
+def write_rss(feed_id: str, title: str, source_url: str, items, max_items: int):
     fg = FeedGenerator()
-    fg.title("Brian Lagerstrom — All Recipes (Unofficial RSS)")
-    fg.link(href=TARGET_URL, rel="alternate")
-    fg.description("Auto-generated RSS feed for Brian Lagerstrom's All Recipes page.")
+    fg.title(title)
+    fg.link(href=source_url, rel="alternate")
+    fg.description(f"Auto-generated RSS feed for {source_url}")
     fg.language("en")
 
     now = utc_now()
     fg.pubDate(now)
 
-    for title, link in items[:MAX_ITEMS]:
+    for item_title, link in items[:max_items]:
         fe = fg.add_entry()
-        fe.title(title)
+        fe.title(item_title)
         fe.link(href=link)
         fe.guid(link, permalink=True)
-        fe.pubDate(now)  # fallback if listing page doesn't provide dates
+        fe.pubDate(now)  # fallback
 
-    os.makedirs(os.path.dirname(OUT_FEED_PATH), exist_ok=True)
-    fg.rss_file(OUT_FEED_PATH)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    out_path = os.path.join(OUTPUT_DIR, f"{feed_id}.xml")
+    fg.rss_file(out_path)
+    print(f"Wrote: {out_path} ({min(len(items), max_items)} items)")
 
 
 def main():
-    state = load_state()
-    items = fetch_recipe_links()
+    cfg = load_config()
+    feeds = cfg.get("feeds", [])
 
-    # Track seen links (optional but handy later)
-    seen_links = set(state.get("seen_links", []))
-    for _, link in items:
-        seen_links.add(link)
-    state["seen_links"] = sorted(seen_links)
+    if not feeds:
+        raise RuntimeError("No feeds found in feeds.json")
 
-    write_rss(items)
-    save_state(state)
+    for f in feeds:
+        feed_id = f["id"]
+        title = f["title"]
+        source_url = f["source_url"]
+        match = f["match_url_contains"]
+        max_items = int(f.get("max_items", 50))
+
+        items = fetch_links(source_url, match)
+        write_rss(feed_id, title, source_url, items, max_items)
 
 
 if __name__ == "__main__":
