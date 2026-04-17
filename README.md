@@ -90,7 +90,7 @@ Once committed:
 -   The homepage (index.html) updates automatically.
 -   The new feed becomes available at:
 
-https://mauvera94.github.io/mau-rss/feeds/atk-recipes.xml
+https://mau-vera.github.io/mau-rss/feeds/atk-recipes.xml
 
 No additional code changes are required.
 
